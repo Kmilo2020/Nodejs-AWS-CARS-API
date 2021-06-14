@@ -1,0 +1,46 @@
+service: cars-rest-api
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: '20201221'
+  profile: deployAWS
+  #To work with DynamoDB Service
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: "*"
+
+functions:
+  app:
+    handler: handler.app
+    events:
+      # - http: 
+          # method: get  
+          # path: /create 
+
+      # After install Express
+      - http: any {proxy+}     
+
+#To work with DynamoDB Service
+resources:
+  Resources:
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: carsTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+#To deploy SLS Offline (Locally), to avoid use live AWS URL every time we deploy our SLS project to test it
+#plugins:
+ # - serverless-offline
